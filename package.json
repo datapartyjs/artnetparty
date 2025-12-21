@@ -1,0 +1,26 @@
+{
+  "name": "artnet-party",
+  "version": "0.0.1",
+  "main": "index.js",
+  "type": "module",
+  "bin": "host.mjs",
+  "pkg": {
+    "assets": "src/dataparty/**"
+  },
+  "scripts": {
+    "build": "node ./build.mjs",
+    "start": "DEBUG=artnetparty*,*,-*.verbose node ./host.mjs",
+    "mkssl": "openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem"
+  },
+  "author": "Dataparty LLC",
+  "license": "GPL-3.0",
+  "description": "",
+  "dependencies": {
+    "@dataparty/api": "https://github.com/datapartyjs/dataparty-api.git",
+    "artnet": "^1.4.0",
+    "debug": "^4.4.1"
+  },
+  "devDependencies": {
+    "argon2-browser": "^1.18.0"
+  }
+}
