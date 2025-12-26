@@ -31,6 +31,20 @@ class ArtNetProxyTask extends ITask {
       allowedIP: options.context.allowedIP
     }
 
+    /**
+     * IPInfo = {
+     *  ip: "",
+     *  firstseen: Date,
+     *  lastseen: Date,
+     *  frames: Number,
+     *  dropped: Number
+     *  bytes: Number
+     * }
+     */
+
+    this.ipMapLastChange = 0
+    this.ipMap = {}  // Map <IP, IPInfo>
+
     this.stats = {
       rx: {
         frames: 0,
@@ -75,6 +89,34 @@ class ArtNetProxyTask extends ITask {
     if(this.server != null){
       this.server.close()
     }
+
+    if(this.client != null){
+      this.client.disconnect()
+    }
+  }
+
+  updateIpInfo(ip, bytes){
+    const now = Date.now()
+    const foundRecord = this.ipMap[ip]
+    if(foundRecord){
+
+      foundRecord.lastseen = now
+      foundRecord.frames++
+      foundRecord.bytes+=bytes
+
+    } else {
+
+      this.ipMap[ip] = {
+        ip,
+        firstseen: now,
+        lastseen: now,
+        frames: 1,
+        dropped: 0,
+        bytes
+      }
+    }
+
+    this.ipMapLastChange = now
   }
 
   onServerError(err){
@@ -85,22 +127,29 @@ class ArtNetProxyTask extends ITask {
   onServerMessage(msg, rinfo){
     //debug('msg: ', msg.length, ' btyes \t', 'from: ', rinfo.address)
 
+    this.updateIpInfo(rinfo.address, rinfo.size)
+
+    this.stats.rx.frames++
+    this.stats.rx.bytes += rinfo.size
+
     if(this.context.party.state.config != null){
       if(this.context.party.state.config.allowedIP.indexOf(rinfo.address) != -1){
       
-        debug('send - ', msg.length, ' btyes \t', 'from: ', rinfo.address)
+        debug('send - ', rinfo.size, ' btyes \t', 'from: ', rinfo.address)
+
+        this.stats.tx.frames++
+        this.stats.tx.bytes += rinfo.size
+
         this.client.send(msg, this.settings.port, this.settings.address)
+      } else {
+        this.ipMap[rinfo.address].dropped++
+        debug('drop', rinfo.address)
       }
     }
     else {
+      this.ipMap[rinfo.address].dropped++
       debug('drop', rinfo.address)
     }
-
-    /*
-    else if(rinfo.address == this.settings.allowedIP && !this.ignoreClient){
-      //debug('\tsend')
-      this.client.send(msg, this.settings.port, this.settings.address)
-    }*/
 
   }
 
