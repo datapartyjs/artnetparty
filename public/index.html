@@ -291,15 +291,15 @@ hr:after {
 
         <table>
           <tr>
-            <td><h1>1</h1></td>
+            <td><h1>House Lights</h1></td>
             <td>
-              <button>black</button>
+              <button onclick='houseLightsOff(event)'>black</button>
             </td>
             <td>
-              <button>white</button>
+              <button onclick='houseLightsOn(event)'>white</button>
             </td>
           </tr>
-          <tr>
+          <!-- <tr>
             <td><h1>2</h1></td>
             <td>
               <button>black</button>
@@ -325,7 +325,7 @@ hr:after {
             <td>
               <button>white</button>
             </td>
-          </tr>
+          </tr> -->
         </table>
         
 
@@ -341,9 +341,33 @@ let part = null
 let config = new Dataparty.Config.LocalStorageConfig({
   basePath:'',
   cloud: {
-    uri: 'https://' + window.location.hostname + ':3000'
+    uri: 'https://' + window.location.hostname + ':443'
   }
 })
+
+async function houseLightsOff(event){
+  event.preventDefault()
+  await houseLights(false)
+}
+
+
+async function houseLightsOn(event){
+  event.preventDefault()
+  await houseLights(true)
+}
+
+
+async function houseLights(state){
+  console.log('houseLights', state)
+  let result = await party.comms.call('set-lights-on', {state}, {
+    expectClearTextReply: true,
+    sendClearTextRequest: true,
+    useSessions: false
+  })
+
+  console.log('houseLights - result - ', result)
+
+}
 
 async function claimInterface(event){
   console.log('do claim')
