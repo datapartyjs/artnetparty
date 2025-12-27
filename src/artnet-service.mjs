@@ -23,6 +23,7 @@ export class ArtNetPartyService extends DatapartySrv.IService {
 
     builder.addEndpoint(Path.join(__dirname, './party/endpoints/get-ip.cjs'))
     builder.addEndpoint(Path.join(__dirname, './party/endpoints/get-state.cjs'))
+    builder.addEndpoint(Path.join(__dirname, './party/endpoints/set-lights-on.cjs'))
     builder.addEndpoint(Path.join(__dirname, './party/endpoints/claim-interface.cjs'))
     builder.addEndpoint(Path.join(__dirname, './party/endpoints/release-interface.cjs'))
     

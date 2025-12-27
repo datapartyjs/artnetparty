@@ -4,6 +4,17 @@ const ITask = require('@dataparty/api/src/service/itask')
 
 const dgram = require('dgram')
 
+const { Buffer } = require('node:buffer');
+
+function arraysIdentical(a, b) {
+    var i = a.length;
+    if (i != b.length) return false;
+    while (i--) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+};
+
 class ArtNetProxyTask extends ITask {
 
   /**
@@ -82,6 +93,8 @@ class ArtNetProxyTask extends ITask {
     debug(err)
   }
 
+  
+
   onServerMessage(msg, rinfo){
     //debug('msg: ', msg.length, ' btyes \t', 'from: ', rinfo.address)
 
@@ -90,6 +103,26 @@ class ArtNetProxyTask extends ITask {
       
         debug('send - ', msg.length, ' btyes \t', 'from: ', rinfo.address)
         this.client.send(msg, this.settings.port, this.settings.address)
+
+        let headerMagic = Buffer.from([65, 114, 116, 45, 78, 101, 116, 0, 0, 80, 0, 14])
+
+        const header = msg.slice(0, 12)
+
+        if( arraysIdentical(header, headerMagic) ){
+          const [fill1, fill2, lUni, hUni, hLen, lLen, ...data] = msg.slice(12)
+
+          const length = (hLen << 8) | lLen
+          const universe = (hUni << 8) | lUni
+
+          console.log( 'dmx-512', universe, length)
+          if(this.context.party.framebuffers[universe]){
+            this.context.party.framebuffers[universe].set( data )
+          }
+
+        }
+
+
+
       }
     }
     else {

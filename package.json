@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "node ./build.mjs",
-    "start": "DEBUG=artnetparty*,*,-*.verbose node ./host.mjs",
+    "start": "DEBUG=artnetparty*,*,-*.verbose,-artnetparty.task.artnetproxy node ./host.mjs",
+    "start-verbose": "DEBUG=artnetparty*,*,-*.verbose node ./host.mjs",
     "mkssl": "openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem"
   },
   "author": "Dataparty LLC",
